@@ -1,0 +1,2 @@
+chinesecalendar==1.11.0
+lunar_python==1.4.8
