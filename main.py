@@ -1,4 +1,5 @@
 import csv
+import os
 from datetime import datetime, timedelta, date
 from lunar_python import Solar
 from chinese_calendar import is_holiday, is_workday, get_holiday_detail
@@ -42,13 +43,16 @@ def generate_calendar_csv(start_date_str, end_date_str, output_file="calendar_ou
     # 准备 CSV 头部
     fieldnames = [
         "公历日期",  # 添加原始公历日期字段
-        "公历年", "公历月", "公历日", "上中下旬", "周数", "星期",
+        "公历年", "公历月", "公历日", "公历旬", "周数", "星期",
         "农历年", "农历月", "农历日", "是否闰月",
         "生肖", "干支年", "干支月", "干支日",
         "节气",
         "是否节假日", "是否工作日", "节日名称"
     ]
 
+    # 确保输出文件夹存在
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    
     with open(output_file, mode='w', encoding='utf-8-sig', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
@@ -106,7 +110,7 @@ def generate_calendar_csv(start_date_str, end_date_str, output_file="calendar_ou
                 "公历年": g_year,
                 "公历月": g_month,
                 "公历日": g_day,
-                "上中下旬": shang_zhong_xia,
+                "公历旬": shang_zhong_xia,
                 "周数": week_number,
                 "星期": weekday,
                 "农历年": l_year,
@@ -137,21 +141,22 @@ if __name__ == "__main__":
         print("====================================")
         
         # 获取开始日期
-        start_date = input("请输入开始日期（格式：YYYY-MM-DD，默认：2025-01-01）: ").strip()
+        current_year = date.today().year
+        start_date = input(f"请输入开始日期（格式：YYYY-MM-DD，默认：{current_year}-01-01）: ").strip()
         if not start_date:
-            start_date = "2025-01-01"
+            start_date = f"{current_year}-01-01"
         
         # 获取结束日期
-        end_date = input("请输入结束日期（格式：YYYY-MM-DD，默认：2025-12-31）: ").strip()
+        end_date = input(f"请输入结束日期（格式：YYYY-MM-DD，默认：{current_year}-12-31）: ").strip()
         if not end_date:
-            end_date = "2025-12-31"
+            end_date = f"{current_year}-12-31"
         
         print("\n正在生成日历数据...")
         
         # 根据开始日期和结束日期自动生成输出文件名
         start_date_str = start_date.replace("-", "")
         end_date_str = end_date.replace("-", "")
-        output_file = f"{start_date_str}-{end_date_str}_chinese_calendar.csv"
+        output_file = f"output/{start_date_str}-{end_date_str}_chinese_calendar.csv"
         
         generate_calendar_csv(start_date, end_date, output_file)
         
