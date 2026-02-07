@@ -10,10 +10,6 @@ CHINESE_CALENDAR_MIN_YEAR = 2004
 CHINESE_CALENDAR_MAX_YEAR = 2030
 
 # 预定义常量映射表（避免在循环中重复创建）
-LUNAR_MONTH_NAMES = [
-    "正月", "二月", "三月", "四月", "五月", "六月",
-    "七月", "八月", "九月", "十月", "冬月", "腊月"
-]
 WEEKDAY_NAMES = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
 
 
@@ -51,8 +47,8 @@ def generate_calendar_csv(start_date_str, end_date_str, output_file="calendar_ou
     fieldnames = [
         "公历日期",  # 添加原始公历日期字段
         "公历年", "公历月", "公历日", "公历旬", "周数", "星期",
-        "农历年", "农历月", "农历月份中文名称", "农历日", "农历日期中文名称", "是否闰月", "农历节日", "是否朔望日",
-        "生肖", "干支年", "干支月", "干支日",
+        "农历年", "农历月", "农历日", "是否闰月", "农历节日",
+        "生肖",
         "节气",
         "是否节假日", "是否工作日", "节日名称"
     ]
@@ -90,15 +86,6 @@ def generate_calendar_csv(start_date_str, end_date_str, output_file="calendar_ou
             l_day = lunar.getDay()
             is_leap = l_month < 0  # 负数月份表示闰月
             
-            # 获取农历月份中文名称（使用预定义常量）
-            lunar_month_abs = abs(l_month)
-            lunar_month_chinese = LUNAR_MONTH_NAMES[lunar_month_abs - 1]
-            if is_leap:
-                lunar_month_chinese = f"闰{lunar_month_chinese}"
-                
-            # 获取农历日期中文名称
-            lunar_day_chinese = lunar.getDayInChinese()
-            
             # 获取农历节日信息（优化：简化合并过程）
             festivals = lunar.getFestivals() or []
             other_festivals = lunar.getOtherFestivals() or []
@@ -111,17 +98,7 @@ def generate_calendar_csv(start_date_str, end_date_str, output_file="calendar_ou
             # 例如：检查是否为元宵节、小年等重要节日
             # 这里使用lunar-python库自动识别的节日信息
             
-            # 判断是否为朔望日
-            is_shuowang = ""
-            if l_day == 1:
-                is_shuowang = "朔日"
-            elif l_day == 15 or l_day == 16:
-                is_shuowang = "望日"
-            
             shengxiao = lunar.getYearShengXiao()
-            gz_year = lunar.getYearInGanZhi()
-            gz_month = lunar.getMonthInGanZhi()
-            gz_day = lunar.getDayInGanZhi()
 
             # 节气（如“立春”、“清明”等，若无则返回空字符串）
             jieqi = lunar.getJieQi() or ""
@@ -148,16 +125,10 @@ def generate_calendar_csv(start_date_str, end_date_str, output_file="calendar_ou
                 "星期": weekday,
                 "农历年": l_year,
                 "农历月": abs(l_month),  # 将负数月份转换为正数
-                "农历月份中文名称": lunar_month_chinese,
                 "农历日": l_day,
-                "农历日期中文名称": lunar_day_chinese,
                 "是否闰月": "是" if is_leap else "否",
                 "农历节日": lunar_festival,
-                "是否朔望日": is_shuowang,
                 "生肖": shengxiao,
-                "干支年": gz_year,
-                "干支月": gz_month,
-                "干支日": gz_day,
                 "节气": jieqi,
                 "是否节假日": "是" if is_hol else "否",
                 "是否工作日": "是" if is_work else "否",
